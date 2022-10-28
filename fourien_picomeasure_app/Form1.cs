@@ -18,8 +18,7 @@ namespace fourien_picomeasure_app
     public partial class PicomeasureApp : Form
     {
 
-        //Here are some changes that I want to test a push to github
-        //here are some more changes
+        //Here are some changes that I want to test a push to github - by Trevor
         //Comment added by Mikel
 
         DataHandler dataHandler = new DataHandler();
