@@ -20,6 +20,7 @@ namespace fourien_picomeasure_app
 
         //Here are some changes that I want to test a push to github
         //here are some more changes
+        //Comment added by Mikel
 
         DataHandler dataHandler = new DataHandler();
         //Replace old data once new data exists (Once thread is complete). Thread handles new data coming in and once the data is complete it is then assigned to the chart/dataHandler/where it needs to go.
