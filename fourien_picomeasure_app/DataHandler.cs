@@ -57,7 +57,21 @@ namespace fourien_picomeasure_app
             }
             this.FileLocation = filePath;
             this.FileContent = fileContent;
+        }
 
+        public void FileSave()
+        {
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.Filter = "dat files (*.dat)|*.dat";
+            saveFileDialog1.RestoreDirectory = true;
+
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                using (StreamWriter sw = new StreamWriter(saveFileDialog1.FileName))
+                {
+                    sw.WriteLine(this.FileContent);
+                }
+            }
         }
 
         public void Clear()
@@ -83,7 +97,7 @@ namespace fourien_picomeasure_app
                     data.RemoveRange(0, 9);
                     foreach (string dataLine in data)
                     {
-                        string[] tempDataArray = dataLine.Split(new char[] { ',' , '\t' });
+                        string[] tempDataArray = dataLine.Split(new char[] { ',', '\t' });
                         if (tempDataArray.Length == 2)
                         {
                             this.XData.Add(double.Parse(tempDataArray[0]));
@@ -97,6 +111,8 @@ namespace fourien_picomeasure_app
                         }
                     }
                 }
+                else
+                    return;
             }
             catch
             {

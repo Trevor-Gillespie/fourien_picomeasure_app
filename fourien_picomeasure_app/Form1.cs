@@ -29,9 +29,9 @@ namespace fourien_picomeasure_app
         {
             InitializeComponent();
             fileContentDisplay.ScrollBars = ScrollBars.Vertical;
-            counterDisplay.Text = "" + 0;
-            timerDisplay.Text = "" + 0;
             chtData.ChartAreas[0].AxisX.LabelStyle.Format = "{0:0}";
+            chtData.ChartAreas[0].AxisY.LabelStyle.Format = "{0:0}";
+
         }
         
         ///<todo>
@@ -48,21 +48,30 @@ namespace fourien_picomeasure_app
         ///     - Thread away the work happening in this method
         ///     - 
         /// </todo>
-        /// 
-        /// <param name="sender">Built-in</param>
-        /// <param name="e">Built-in</param>
-        private void btnFileSelectorClick(object sender, EventArgs e)
+        private void btnFileSelector_Click(object sender, EventArgs e)
         {
-            //Don't assign any data until the thread is done executing. If we use one.
+            //Don't assign any data until the thread is done executing.
             //Ensure the FileSelection is complete and able to pass the fileContent to the GenerateDataSets function. Events is an option.
             dataHandler.FileSelection();
-            dataHandler.GenerateDataSets();
+            Thread thr = new Thread(() => dataHandler.GenerateDataSets());
+            thr.Start();
+            thr.Join();
             displayFileName.Text = dataHandler.FileLocation.ToString();
 
-            chtData.Series["rawData"].Points.DataBindXY(dataHandler.XData, dataHandler.YData);
-            double yMax = dataHandler.YData.Max() + 5;
+            for(int i = 0; i < dataHandler.XData.Count; i++)
+            {
+                chtData.Series["rawData"].Points.AddXY(dataHandler.XData[i], dataHandler.YData[i]);
+            }
+
+            //The below settings aligns the 2 chart areas and sets the x and y intervals to match. Y values are +/- 3 for aesthetics.
+            double yMax = dataHandler.YData.Max() + 3;
+            double yMin = dataHandler.YData.Min() -3;
             chtData.ChartAreas[0].AxisY.Maximum = yMax;
-            //MessageBox.Show(dataHandler.YData.Max().ToString());
+            chtData.ChartAreas[0].AxisY.Minimum = yMin;
+            chtData.ChartAreas[1].AxisY.Maximum = chtData.ChartAreas[0].AxisY.Maximum;
+            chtData.ChartAreas[1].AxisY.Minimum = chtData.ChartAreas[0].AxisY.Minimum;
+
+            //Displays the current file info in the text box on the left of the form
             fileContentDisplay.Text = dataHandler.FileContent.ToString();
 
         }
@@ -72,10 +81,12 @@ namespace fourien_picomeasure_app
             ///<TODO>
             ///     - Write save file method in datahandler and insert it here for on-click
             /// </TODO>
+            /// 
+            dataHandler.FileSave();
         }
 
         /// <summary>
-        ///  Create a Point variable that is nullable and a new tooltip object outside of the function that will be used during mouse click event on chart. You must click directly on a datapoint to have it display, if you click anywhere else, the popup will be discarded.
+        ///  Provides data point values when you click on a point on the chart. Creates a Point variable that is nullable and a new tooltip object outside of the function that will be used during mouse click event on chart. You must click directly on a datapoint to have it display, if you click anywhere else, the popup will be discarded.
         /// </summary>
         Point? prevPosition = null;
         ToolTip tooltip = new ToolTip();
@@ -121,14 +132,18 @@ namespace fourien_picomeasure_app
         /// <param name="e"></param>
         private void chkbxLorentz_CheckedChanged(object sender, EventArgs e)
         {
-            chtData.Series["lorentzian"].Points.DataBindXY(dataHandler.XData, dataHandler.FitData);
+            for (int i = 0; i < dataHandler.FitData.Count; i++)
+            {
+                chtData.Series["lorentzian"].Points.AddXY(dataHandler.XData[i], dataHandler.FitData[i]);
+            }
+            
         }
 
 
         /// <summary>
-        /// This just clears the chart. Doesn't remove data from the DataHandler Object.
+        /// Clears data from data handler and the chart area
         /// </summary>
-        private void btnClearClick(object sender, EventArgs e)
+        private void btnClear_Click(object sender, EventArgs e)
         {
             foreach(var series in chtData.Series)
             {
@@ -136,39 +151,5 @@ namespace fourien_picomeasure_app
                 series.Points.Clear();
             }
         }
-
-
-
-
-
-
-
-        private void btnTimer_Click(object sender, EventArgs e)
-        {
-            Timer();
-        }
-        public void Timer()
-        {
-            int time = 0;
-            for(int i = 0; i < 30; i++)
-            {
-                time += 1;
-                timerDisplay.Text = time.ToString();
-            }
-        }
-        private void btnCounter_Click(object sender, EventArgs e)
-        {
-            Counter();
-            //Thread t = new Thread(Counter);
-            //t.Start();
-        }
-        public void Counter()
-        {
-            int count = int.Parse(counterDisplay.Text);
-            count += 1;
-            counterDisplay.Text = count.ToString();
-        }
-
-        
     }
 }
